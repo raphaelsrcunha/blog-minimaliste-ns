@@ -1,20 +1,18 @@
 <template>
     <Page>
-      <ActionBar title="Blog Minimaliste - TP3" />
+      <ActionBar title="Próxima Página" />
       <StackLayout>
-        <Label text="Bienvenue au blog!" class="message" />
-        <Button text="Commencer" @tap="goToNextPage" />
+        <Label text="Você está na próxima página!" class="message" />
+        <Button text="Voltar" @tap="goBack" />
       </StackLayout>
     </Page>
   </template>
   
   <script>
-  import Register from "./Register.vue"; 
-  
   export default {
     methods: {
-      goToNextPage() {
-        this.$navigateTo(Register); 
+      goBack() {
+        this.$navigateBack();
       },
     },
   };
