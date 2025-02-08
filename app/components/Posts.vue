@@ -3,11 +3,7 @@
         <ActionBar title="Posts" />
         <StackLayout class="posts-container">
             <Label text="Posts List" class="title" />
-            <ListView 
-                for="post in posts" 
-                class="post-list" 
-                @itemTap="viewPostDetails"
-            >
+            <ListView for="post in posts" class="post-list" @itemTap="viewPostDetails">
                 <v-template>
                     <StackLayout class="post-item">
                         <Label :text="'User ID: ' + post.user_id" class="post-user" />
@@ -16,14 +12,13 @@
                 </v-template>
             </ListView>
             <Button text="Create Post" @tap="goToCreatePost" class="button" />
-            <Button text="Go Back" @tap="goBack" class="button-back" />
+            <Button text="Logoff" @tap="goBack" class="button-back" />
         </StackLayout>
     </Page>
 </template>
 
 <script>
 import axios from "axios";
-import { goBack } from "@nativescript/core/ui/frame/frame-common";
 import CreatePost from "./CreatePost.vue";
 import PostDetails from "./PostDetails.vue";
 import * as applicationSettings from "@nativescript/core/application-settings";
@@ -48,14 +43,24 @@ export default {
                 this.posts = response.data;
             } catch (error) {
                 console.error(error);
+                alert("Falha ao carregar posts");
             }
         },
         viewPostDetails(args) {
             const selectedPost = this.posts[args.index];
-            this.$navigateTo(PostDetails, { props: { post: selectedPost } });
+            this.$navigateTo(PostDetails, { 
+                props: { post: selectedPost },
+                events: {
+                    postDeleted: this.getAllPosts
+                }
+            });
         },
         goToCreatePost() {
-            this.$navigateTo(CreatePost);
+            this.$navigateTo(CreatePost, {
+                props: {
+                    onPostCreated: this.getAllPosts
+                }
+            });
         },
         goBack() {
             this.$navigateBack();
@@ -77,7 +82,8 @@ export default {
 }
 
 .post-list {
-    margin: 10;
+    margin: 5;
+    max-height: 400;
 }
 
 .post-item {
@@ -85,7 +91,7 @@ export default {
     margin: 5;
     border-width: 1;
     border-color: #ccc;
-    border-radius: 5;
+    border-radius: 10;
 }
 
 .post-user {

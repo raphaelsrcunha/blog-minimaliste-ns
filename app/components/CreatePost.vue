@@ -25,10 +25,14 @@
 <script>
 import axios from "axios";
 import * as applicationSettings from "@nativescript/core/application-settings";
-import { goBack } from "@nativescript/core/ui/frame/frame-common";
-
 
 export default {
+    props: {
+        onPostCreated: {
+            type: Function,
+            default: null
+        }
+    },
     data() {
         return {
             content: "", 
@@ -36,11 +40,8 @@ export default {
     },
     methods: {
         async submitPost() {
-            if (this.content) {
+            if (this.content.trim()) {
                 try {
-                    //const userId = "12345"; 
-                    //const username = "loggedUser";
-
                     const response = await axios.post("http://10.0.2.2:3000/posts", {
                         content: this.content,
                     }, {
@@ -51,6 +52,11 @@ export default {
 
                     if (response && response.status === 201) {
                         alert("Post created successfully!");
+                        
+                        if (this.onPostCreated) {
+                            this.onPostCreated();
+                        }
+                        
                         this.clearFields();
                         this.$navigateBack(); 
                     } else {

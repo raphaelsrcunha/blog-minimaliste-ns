@@ -2,11 +2,12 @@
     <Page>
         <ActionBar title="Post Details" />
         <StackLayout class="post-details-container">
-            <!-- Exibe as informações do post -->
-            <Label :text="post.user + ': '" class="post-user" />
-            <Label :text="post.content" class="post-content" />
 
-            <!-- Campo para inserir uma resposta -->
+            <Label :text="'Post ID: ' + post.id" class="post-user" />
+            <Label :text="'User ID: ' + post.user_id" class="post-user" />
+            <Label :text="'Created at: ' + formattedDate" class="post-user" />
+            <Label :text=post.content class="post-content" textWrap="true" />
+
             <TextView 
                 v-model="newResponse" 
                 hint="Write your response..." 
@@ -20,14 +21,25 @@
                 class="button"
             />
 
-            <Button text="Go Back" @tap="goBack" class="button-back" />
+            <Button 
+                text="Delete Post" 
+                @tap="deletePost" 
+                class="button-back" 
+                :isEnabled="canDeletePost"
+            />
 
-            <!-- Lista de respostas -->
-            <Label text="Responses:" class="responses-title" />
-            <ListView for="response in responses" class="responses-list">
+            <Button 
+                text="Go Back" 
+                @tap="goBack" 
+                class="button-back" 
+            />
+
+            <Label text="Comments for this post" class="responses-title" />
+            <ListView for="response in responses" class="responses-list" @itemTap="viewCommentDetails">
                 <v-template>
                     <StackLayout class="response-item">
-                        <Label :text="response.user + ': '" class="response-user" />
+                        <Label :text="'User ID: ' + response.user_id" class="response-user" />
+                        <Label :text="'Created at: ' + response.created_at" class="response-user" />
                         <Label :text="response.content" class="response-content" />
                     </StackLayout>
                 </v-template>
@@ -38,6 +50,10 @@
 </template>
 
 <script>
+import axios from "axios";
+import CommentDetails from "./CommentDetails.vue";
+import * as applicationSettings from "@nativescript/core/application-settings";
+
 export default {
     props: {
         post: {
@@ -47,26 +63,83 @@ export default {
     },
     data() {
         return {
-            newResponse: "", // Campo para o texto da resposta
-            responses: [], // Lista de respostas
+            newResponse: "", 
+            responses: [], 
         };
     },
+    computed: {
+        canDeletePost() {
+            return applicationSettings.getString('userIdLogged') == this.post.user_id.toString();
+        },
+        formattedDate() {
+            const date = new Date(this.post.created_at);
+            return date.toLocaleString(); 
+        }
+    },
+    mounted() {
+        this.getAllResponses();
+    },
     methods: {
-        postResponse() {
-            if (this.newResponse.trim() !== "") {
-                // Adiciona uma nova resposta à lista
-                this.responses.push({
-                    user: "Current User", // Substituir pelo username real do usuário logado
-                    content: this.newResponse,
+        async getAllResponses() {
+            try {
+                const response = await axios.get(`http://10.0.2.2:3000/posts/${this.post.id}/comments`, {
+                    headers: {
+                        Authorization: `Bearer ${applicationSettings.getString("authToken")}`,
+                    },
                 });
-                // Limpa o campo de texto
-                this.newResponse = "";
+                this.responses = response.data;
+            } catch (error) {
+                alert("Failed to load responses. Try again.");
+            }
+        },
+        postResponse() {
+            if (this.newResponse) {
+                axios.post(`http://10.0.2.2:3000/posts/${this.post.id}/comments`, {
+                    content: this.newResponse,
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${applicationSettings.getString("authToken")}`,
+                    },
+                }).then((response) => {
+                    if (response && response.status === 201) {
+                        alert("Response posted successfully!");
+                        this.newResponse = "";
+                        this.getAllResponses();
+                    } else {
+                        alert("Failed to post the response. Try again.");
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                });
+            }
+        },
+        async deletePost() {
+            const response = await axios.delete(`http://10.0.2.2:3000/posts/${this.post.id}`, {
+                headers: {
+                    Authorization: `Bearer ${applicationSettings.getString("authToken")}`,
+                },
+            });
+
+            if (response && response.status === 201) {
+                alert("Post deleted successfully!");
+                this.$emit("postDeleted");
+                this.$navigateBack();
             } else {
-                alert("Please write a response before posting.");
+                alert("Failed to delete the post. Try again.");
             }
         },
         goBack() {
             this.$navigateBack();
+        },
+        viewCommentDetails(args) {
+            const selectedResponse = this.responses[args.index];
+            this.$navigateTo(CommentDetails, { 
+                props: { comment: selectedResponse },
+                events: {
+                    commentDeleted: this.getAllResponses,
+                    commentUpdated: this.getAllResponses
+                }
+            });
         },
     },
 };
@@ -85,8 +158,10 @@ export default {
 
 .post-content, .response-content {
     font-size: 16;
+    width: 100%;
     color: #333;
     margin-bottom: 20;
+    text-wrap: true;
 }
 
 .response-input {
@@ -99,7 +174,7 @@ export default {
 }
 
 .textarea {
-    height: 150; /* Altura maior para textos longos */
+    height: 150; 
     margin-bottom: 15;
     padding: 10;
     font-size: 18;
@@ -110,7 +185,7 @@ export default {
 
 .responses-list {
     margin: 10;
-    max-height: 300; /* Ajuste o tamanho máximo da lista */
+    max-height: auto; 
 }
 
 .response-item {

@@ -23,12 +23,6 @@
         />
 
         <Button 
-          text="Go To Posts" 
-          @tap="goToPostsPage" 
-          class="button"
-        />
-
-        <Button 
           text="Go Back" 
           @tap="goBack" 
           class="button-back"
@@ -65,6 +59,8 @@
                 if (response && response.status === 201) {
                     applicationSettings.setString('authToken', response.data.token);
                     applicationSettings.setString('usernameLogged', this.username);
+                    applicationSettings.setString('userIdLogged', response.data.userId.toString());
+                    applicationSettings.setString('userRole', response.data.role);
                     this.clearFields();
                     this.goToPostsPage();
                 } else {
