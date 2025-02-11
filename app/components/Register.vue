@@ -1,49 +1,53 @@
 <template>
     <Page>
-      <ActionBar title="Register" />
-      <StackLayout class="form-container">
-        <TextField 
-          v-model="username" 
-          hint="Enter your username" 
-          class="input" 
-          keyboardType="text"
-        />
-  
-        <TextField 
-          v-model="password" 
-          hint="Enter your password" 
-          secureTextEntry="true" 
-          class="input"
-        />
-  
-        <TextField 
-          v-model="role" 
-          hint="Enter your role" 
-          class="input"
-        />
-  
-        <Button 
-          text="Register" 
-          @tap="registerUser" 
-          class="button"
-        />
-
-        <Button 
-          text="Login" 
-          @tap="goToLoginPage" 
-          class="button"
-        />
-
-        <Button 
-          text="Go Back" 
-          @tap="goBack" 
-          class="button-back"
-        />
-      </StackLayout>
+        <ActionBar title="Register" flat="true" class="action-bar">
+            <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
+        </ActionBar>
+        <ScrollView>
+            <StackLayout class="form-container">
+                <StackLayout class="auth-card">
+                    <Label text="Create Account" class="auth-title" />
+                    
+                    <TextField 
+                        v-model="username" 
+                        hint="Username" 
+                        class="input-field" 
+                        keyboardType="text"
+                    />
+            
+                    <TextField 
+                        v-model="password" 
+                        hint="Password" 
+                        :secure="true"
+                        class="input-field"
+                    />
+            
+                    <TextField 
+                        v-model="role" 
+                        hint="Role (user/admin)" 
+                        class="input-field"
+                    />
+            
+                    <FlexboxLayout class="buttons-container">
+                        <Button 
+                            text="Register" 
+                            @tap="registerUser" 
+                            class="action-button"
+                        />
+                        
+                        <Button 
+                            text="Login" 
+                            @tap="goToLoginPage" 
+                            class="secondary-button"
+                        />
+                    </FlexboxLayout>
+                </StackLayout>
+            </StackLayout>
+        </ScrollView>
     </Page>
-  </template>
-  
-  <script>
+</template>
+
+<script>
   import axios from "axios";
   import Login from "./Login.vue"; 
 
@@ -98,40 +102,67 @@
       }
     },
   };
-  </script>
-  
-  <style scoped>
-  .form-container {
-    padding: 20;
-    margin: 20;
-  }
-  
-  .input {
-    margin-bottom: 15;
-    padding: 10;
-    font-size: 18;
-    border-width: 1;
-    border-color: #ccc;
-    border-radius: 5;
-  }
-  
-  .button {
-    margin-top: 10;
-    padding: 10;
-    font-size: 18;
-    background-color: #4CAF50;
-    color: white;
-    text-align: center;
-    border-radius: 5;
-  }
+</script>
 
-  .button-back {
-    margin-top: 10;
-    padding: 10;
-    font-size: 18;
-    background-color: #f44336;
-    color: white;
+<style scoped>
+.action-bar {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}
+
+.form-container {
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+.auth-card {
+    padding: 24;
+    margin: 16;
+    background-color: white;
+    elevation: 2;
+    border-radius: 8;
+}
+
+.auth-title {
+    font-size: 28;
+    font-weight: bold;
+    color: #1a73e8;
     text-align: center;
-    border-radius: 5;
-  }
-  </style>
+    margin-bottom: 24;
+}
+
+.input-field {
+    margin-bottom: 16;
+    padding: 12;
+    font-size: 16;
+    border-width: 1;
+    border-color: #e0e0e0;
+    border-radius: 8;
+    background-color: #f8f9fa;
+}
+
+.buttons-container {
+    justify-content: space-between;
+    margin-top: 24;
+}
+
+.action-button {
+    width: 45%;
+    background-color: #1a73e8;
+    color: white;
+    font-size: 16;
+    font-weight: bold;
+    padding: 12;
+    border-radius: 8;
+}
+
+.secondary-button {
+    width: 45%;
+    background-color: #34495e;
+    color: white;
+    font-size: 16;
+    font-weight: bold;
+    padding: 12;
+    border-radius: 8;
+}
+</style>

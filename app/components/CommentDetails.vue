@@ -1,37 +1,39 @@
 <template>
     <Page>
-        <ActionBar title="Comment Details" class="action-bar">
-            <NavigationButton text="Back" @tap="goBack" android.systemIcon="ic_menu_back" />
+        <ActionBar title="Comment Details" flat="true" class="action-bar">
+            <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
         </ActionBar>
-        <StackLayout class="page">
-            <Label :text="'User ID: ' + comment.user_id" class="comment-user" />
-            <Label :text="'Created at: ' + comment.created_at" class="comment-date" />
-            <Label :text="comment.content" class="comment-content" />
+        <ScrollView>
+            <StackLayout class="comment-details-container">
+                <StackLayout class="comment-item">
+                    <FlexboxLayout class="comment-header">
+                        <Label text="@" class="user-icon" />
+                        <Label :text="'user_' + comment.user_id" class="comment-user" />
+                    </FlexboxLayout>
+                    
+                    <TextView 
+                        v-model="newResponse" 
+                        class="textarea" 
+                        multiline="true"
+                        editable="true"
+                    />
 
-            <TextView 
-                v-model="newResponse" 
-                hint="Write your response..." 
-                class="textarea" 
-                multiline="true"
-                editable="true"
-            />
-
-            <Button 
-                text="Update Response" 
-                @tap="updateResponse" 
-                class="button"
-            />
-            
-            <Button 
-                text="Delete" 
-                @tap="deleteComment" 
-                class="delete-button" 
-            />
-        
-        </StackLayout>
-
-
-
+                    <FlexboxLayout class="buttons-container">
+                        <Button 
+                            text="Update" 
+                            @tap="updateResponse" 
+                            class="action-button"
+                        />
+                        
+                        <Button 
+                            text="Delete" 
+                            @tap="deleteComment" 
+                            class="delete-button" 
+                        />
+                    </FlexboxLayout>
+                </StackLayout>
+            </StackLayout>
+        </ScrollView>
     </Page>
 </template>
 
@@ -48,8 +50,15 @@ export default {
     },
     data() {
         return {
-            newResponse: "",
+            newResponse: this.comment.content, 
         };
+    },
+    mounted() {
+        const userIdLogged = applicationSettings.getString('userIdLogged');
+        if (userIdLogged != this.comment.user_id.toString()) {
+            alert("Access denied");
+            this.$navigateBack();
+        }
     },
     methods: {
         goBack() {
@@ -90,51 +99,79 @@ export default {
 </script>
 
 <style scoped>
-.page {
-    padding: 20;
+.action-bar {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}
+
+.comment-details-container {
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+.comment-item {
+    padding: 16;
+    margin: 8;
+    background-color: white;
+    elevation: 2;
+}
+
+.comment-header {
+    margin-bottom: 12;
+}
+
+.user-icon {
+    width: 32;
+    height: 32;
+    padding: 6;
+    margin-right: 8;
+    text-align: center;
+    color: #ffffff;
+    background-color: #1a73e8;
+    border-radius: 16;
+    font-size: 14;
 }
 
 .comment-user {
-    font-size: 20;
-    margin-bottom: 10;
-}
-
-.comment-date {
     font-size: 16;
-    margin-bottom: 10;
-}
-
-.comment-content {
-    font-size: 16;
-}
-
-.delete-button {
-    margin-top: 10;
-    padding: 10;
-    font-size: 18;
-    background-color: #f44336;
-    color: white;
-    text-align: center;
-    border-radius: 5;
+    font-weight: 500;
+    color: #1a1a1a;
+    padding-top: 6;
 }
 
 .textarea {
-    height: 150; 
-    margin-bottom: 15;
-    padding: 10;
-    font-size: 18;
+    height: 120;
+    padding: 12;
+    font-size: 16;
     border-width: 1;
-    border-color: #ccc;
-    border-radius: 5;
+    border-color: #e0e0e0;
+    border-radius: 8;
+    margin: 16 0;
+    background-color: #f8f9fa;
 }
 
-.button {
-    margin-top: 10;
-    padding: 10;
-    font-size: 18;
-    background-color: #4CAF50;
+.buttons-container {
+    justify-content: space-between;
+    margin-top: 16;
+}
+
+.action-button {
+    width: 45%;
+    background-color: #1a73e8;
     color: white;
-    text-align: center;
-    border-radius: 5;
+    font-size: 16;
+    font-weight: bold;
+    padding: 12;
+    border-radius: 8;
+}
+
+.delete-button {
+    width: 45%;
+    background-color: #dc3545;
+    color: white;
+    font-size: 16;
+    font-weight: bold;
+    padding: 12;
+    border-radius: 8;
 }
 </style>

@@ -1,24 +1,40 @@
 <template>
     <Page>
-        <ActionBar title="Create Post" />
-        <StackLayout class="form-container">
-            <TextView 
-                v-model="content" 
-                hint="Write your post here..." 
-                class="textarea"
-                editable="true"
-            />
-            <Button 
-                text="Submit Post" 
-                @tap="submitPost" 
-                class="button"
-            />
-            <Button 
-                text="Go Back" 
-                @tap="goBack" 
-                class="button-back"
-            />
-        </StackLayout>
+        <ActionBar title="Create Post" flat="true" class="action-bar">
+            <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
+        </ActionBar>
+        <ScrollView>
+            <StackLayout class="create-post-container">
+                <StackLayout class="post-form">
+                    <FlexboxLayout class="form-header">
+                        <Label text="@" class="user-icon" />
+                        <Label :text="'user_' + getCurrentUserId()" class="post-user" />
+                    </FlexboxLayout>
+                    
+                    <TextView 
+                        v-model="content" 
+                        hint="What's on your mind?" 
+                        class="textarea"
+                        multiline="true"
+                        editable="true"
+                    />
+
+                    <FlexboxLayout class="buttons-container">
+                        <Button 
+                            text="Post" 
+                            @tap="submitPost" 
+                            class="action-button"
+                        />
+                        
+                        <Button 
+                            text="Cancel" 
+                            @tap="goBack" 
+                            class="cancel-button"
+                        />
+                    </FlexboxLayout>
+                </StackLayout>
+            </StackLayout>
+        </ScrollView>
     </Page>
 </template>
 
@@ -39,6 +55,9 @@ export default {
         };
     },
     methods: {
+        getCurrentUserId() {
+            return applicationSettings.getString('userIdLogged');
+        },
         async submitPost() {
             if (this.content.trim()) {
                 try {
@@ -52,12 +71,10 @@ export default {
 
                     if (response && response.status === 201) {
                         alert("Post created successfully!");
-                        
                         if (this.onPostCreated) {
                             this.onPostCreated();
                         }
-                        
-                        this.clearFields();
+                        this.content = "";
                         this.$navigateBack(); 
                     } else {
                         alert("Failed to create the post. Try again.");
@@ -67,11 +84,8 @@ export default {
                     alert("An error occurred. Please try again.");
                 }
             } else {
-                alert("Please write something before submitting.");
+                alert("Please write something before posting.");
             }
-        },
-        clearFields() {
-            this.content = "";
         },
         goBack() {
             this.$navigateBack();
@@ -81,38 +95,79 @@ export default {
 </script>
 
 <style scoped>
-.form-container {
-    padding: 20;
-    margin: 20;
+.action-bar {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}
+
+.create-post-container {
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+.post-form {
+    padding: 16;
+    margin: 8;
+    background-color: white;
+    elevation: 2;
+}
+
+.form-header {
+    margin-bottom: 12;
+}
+
+.user-icon {
+    width: 32;
+    height: 32;
+    padding: 6;
+    margin-right: 8;
+    text-align: center;
+    color: #ffffff;
+    background-color: #1a73e8;
+    border-radius: 16;
+    font-size: 14;
+}
+
+.post-user {
+    font-size: 16;
+    font-weight: 500;
+    color: #1a1a1a;
+    padding-top: 6;
 }
 
 .textarea {
-    height: 150;
-    margin-bottom: 15;
-    padding: 10;
-    font-size: 18;
+    height: 200;
+    padding: 12;
+    font-size: 16;
     border-width: 1;
-    border-color: #ccc;
-    border-radius: 5;
+    border-color: #e0e0e0;
+    border-radius: 8;
+    margin: 16 0;
+    background-color: #f8f9fa;
 }
 
-.button {
-    margin-top: 10;
-    padding: 10;
-    font-size: 18;
-    background-color: #4CAF50;
-    color: white;
-    text-align: center;
-    border-radius: 5;
+.buttons-container {
+    justify-content: space-between;
+    margin-top: 16;
 }
 
-.button-back {
-    margin-top: 10;
-    padding: 10;
-    font-size: 18;
-    background-color: #f44336;
+.action-button {
+    width: 45%;
+    background-color: #1a73e8;
     color: white;
-    text-align: center;
-    border-radius: 5;
+    font-size: 16;
+    font-weight: bold;
+    padding: 12;
+    border-radius: 8;
+}
+
+.cancel-button {
+    width: 45%;
+    background-color: #dc3545;
+    color: white;
+    font-size: 16;
+    font-weight: bold;
+    padding: 12;
+    border-radius: 8;
 }
 </style>

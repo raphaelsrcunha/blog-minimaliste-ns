@@ -1,19 +1,25 @@
 <template>
     <Page>
-        <ActionBar title="Posts" />
-        <StackLayout class="posts-container">
-            <Label text="Posts List" class="title" />
-            <ListView for="post in posts" class="post-list" @itemTap="viewPostDetails">
-                <v-template>
-                    <StackLayout class="post-item">
-                        <Label :text="'User ID: ' + post.user_id" class="post-user" />
-                        <Label :text="post.content" class="post-content" />
-                    </StackLayout>
-                </v-template>
-            </ListView>
-            <Button text="Create Post" @tap="goToCreatePost" class="button" />
-            <Button text="Logoff" @tap="goBack" class="button-back" />
-        </StackLayout>
+        <ActionBar title="Feed" flat="true" class="action-bar">
+            <NavigationButton text="Back" android.systemIcon="ic_menu_close_clear_cancel" @tap="goBack" />
+        </ActionBar>
+        <GridLayout rows="auto,*" columns="*">
+            <Label :text="'Welcome back, ' + getUsername() + ' :)'" class="greeting" row="0" col="0" />
+            <StackLayout class="posts-container" row="1" col="0">
+                <ListView for="post in posts" class="post-list" separatorColor="transparent" @itemTap="viewPostDetails">
+                    <v-template>
+                        <StackLayout class="post-item">
+                            <FlexboxLayout class="post-header">
+                                <Label text="@" class="user-icon" />
+                                <Label :text="'user_' + post.user_id" class="post-user" />
+                            </FlexboxLayout>
+                            <Label :text="post.content" class="post-content" textWrap="true" />
+                        </StackLayout>
+                    </v-template>
+                </ListView>
+            </StackLayout>
+            <Button text="+" @tap="goToCreatePost" class="fab-button" row="1" col="0" />
+        </GridLayout>
     </Page>
 </template>
 
@@ -47,13 +53,17 @@ export default {
             }
         },
         viewPostDetails(args) {
-            const selectedPost = this.posts[args.index];
-            this.$navigateTo(PostDetails, { 
-                props: { post: selectedPost },
-                events: {
-                    postDeleted: this.getAllPosts
-                }
-            });
+            try {
+                const selectedPost = this.posts[args.index];
+                this.$navigateTo(PostDetails, { 
+                    props: { post: selectedPost },
+                    events: {
+                        postDeleted: this.getAllPosts
+                    }
+                });
+            } catch (error) {
+                alert(error);
+            }
         },
         goToCreatePost() {
             this.$navigateTo(CreatePost, {
@@ -65,63 +75,89 @@ export default {
         goBack() {
             this.$navigateBack();
         },
+        getUsername() {
+            return applicationSettings.getString('usernameLogged');
+        },
     },
 };
 </script>
 
 <style scoped>
-.posts-container {
-    padding: 20;
+.action-bar {
+    background-color: #ffffff;
+    color: #1a1a1a;
 }
 
-.title {
+.posts-container {
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+.fab-button {
+    height: 56;
+    width: 56;
+    margin: 16;
+    border-radius: 28;
     font-size: 24;
     font-weight: bold;
-    text-align: center;
-    margin-bottom: 20;
+    background-color: #1a73e8;
+    color: white;
+    horizontal-align: right;
+    vertical-align: bottom;
+    elevation: 6;
 }
 
 .post-list {
-    margin: 5;
-    max-height: 400;
+    margin: 0;
+    background-color: transparent;
 }
 
 .post-item {
-    padding: 10;
-    margin: 5;
-    border-width: 1;
-    border-color: #ccc;
-    border-radius: 10;
+    padding: 16;
+    margin: 8 0;
+    background-color: white;
+    border-radius: 0;
+    elevation: 1;
+}
+
+.post-header {
+    margin-bottom: 12;
+}
+
+.user-icon {
+    width: 32;
+    height: 32;
+    padding: 6;
+    margin-right: 8;
+    text-align: center;
+    color: #ffffff;
+    background-color: #1a73e8;
+    border-radius: 16;
+    font-size: 14;
 }
 
 .post-user {
-    font-size: 18;
-    font-weight: bold;
-    margin-bottom: 5;
+    font-size: 16;
+    font-weight: 500;
+    color: #1a1a1a;
+    padding-top: 6;
 }
 
 .post-content {
     font-size: 16;
-    color: #666;
+    color: #333333;
+    line-height: 1.5;
+    margin-bottom: 8;
 }
 
-.button {
-    margin-top: 20;
-    padding: 10;
+.greeting {
     font-size: 18;
-    background-color: #4CAF50;
-    color: white;
+    font-weight: 400;
+    color: #000000;
+    padding: 16;
+    background-color: white;
+    border-bottom-width: 1;
+    border-bottom-color: #e0e0e0;
     text-align: center;
-    border-radius: 5;
-}
-
-.button-back {
-    margin-top: 10;
-    padding: 10;
-    font-size: 18;
-    background-color: #f44336;
-    color: white;
-    text-align: center;
-    border-radius: 5;
 }
 </style>

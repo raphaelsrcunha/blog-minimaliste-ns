@@ -1,51 +1,55 @@
 <template>
     <Page>
-        <ActionBar title="Post Details" />
-        <StackLayout class="post-details-container">
+        <ActionBar title="Post Details" flat="true" class="action-bar">
+            <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
+        </ActionBar>
+        <ScrollView>
+            <StackLayout class="post-details-container">
+                <!-- Post Content -->
+                <StackLayout class="post-item">
+                    <FlexboxLayout class="post-header">
+                        <Label text="@" class="user-icon" />
+                        <Label :text="'user_' + post.user_id" class="post-user" />
+                        <Label :text="formattedDate" class="post-date" />
+                        <Label 
+                            v-if="canDeletePost" 
+                            text="❌" 
+                            class="delete-icon" 
+                            @tap="deletePost" 
+                        />
+                    </FlexboxLayout>
+                    <Label :text="post.content" class="post-content" textWrap="true" />
+                </StackLayout>
 
-            <Label :text="'Post ID: ' + post.id" class="post-user" />
-            <Label :text="'User ID: ' + post.user_id" class="post-user" />
-            <Label :text="'Created at: ' + formattedDate" class="post-user" />
-            <Label :text=post.content class="post-content" textWrap="true" />
+                <!-- New Comment Section -->
+                <StackLayout class="comment-input-container">
+                    <TextView 
+                        v-model="newResponse" 
+                        hint="Write a comment..." 
+                        class="textarea" 
+                        multiline="true"
+                        editable="true"
+                    />
+                    <Button 
+                        text="Comment" 
+                        @tap="postResponse" 
+                        class="action-button"
+                    />
+                </StackLayout>
 
-            <TextView 
-                v-model="newResponse" 
-                hint="Write your response..." 
-                class="textarea" 
-                multiline="true"
-                editable="true"
-            />
-            <Button 
-                text="Post Response" 
-                @tap="postResponse" 
-                class="button"
-            />
-
-            <Button 
-                text="Delete Post" 
-                @tap="deletePost" 
-                class="button-back" 
-                :isEnabled="canDeletePost"
-            />
-
-            <Button 
-                text="Go Back" 
-                @tap="goBack" 
-                class="button-back" 
-            />
-
-            <Label text="Comments for this post" class="responses-title" />
-            <ListView for="response in responses" class="responses-list" @itemTap="viewCommentDetails">
-                <v-template>
-                    <StackLayout class="response-item">
-                        <Label :text="'User ID: ' + response.user_id" class="response-user" />
-                        <Label :text="'Created at: ' + response.created_at" class="response-user" />
-                        <Label :text="response.content" class="response-content" />
+                <!-- Comments List -->
+                <Label text="Comments" class="section-title" />
+                <StackLayout class="comments-container">
+                    <StackLayout v-for="(response, index) in responses" :key="index" class="comment-item" @tap="viewCommentDetails({index})">
+                        <FlexboxLayout class="comment-header">
+                            <Label text="@" class="user-icon small" />
+                            <Label :text="'user_' + response.user_id" class="comment-user" />
+                        </FlexboxLayout>
+                        <Label :text="response.content" class="comment-content" textWrap="true" />
                     </StackLayout>
-                </v-template>
-            </ListView>
-
-        </StackLayout>
+                </StackLayout>
+            </StackLayout>
+        </ScrollView>
     </Page>
 </template>
 
@@ -53,6 +57,7 @@
 import axios from "axios";
 import CommentDetails from "./CommentDetails.vue";
 import * as applicationSettings from "@nativescript/core/application-settings";
+import { confirm } from "@nativescript/core/ui/dialogs";
 
 export default {
     props: {
@@ -73,7 +78,7 @@ export default {
         },
         formattedDate() {
             const date = new Date(this.post.created_at);
-            return date.toLocaleString(); 
+            return date.toLocaleDateString() + ' ' + date.getHours() + ':' + date.getMinutes();
         }
     },
     mounted() {
@@ -114,18 +119,28 @@ export default {
             }
         },
         async deletePost() {
-            const response = await axios.delete(`http://10.0.2.2:3000/posts/${this.post.id}`, {
-                headers: {
-                    Authorization: `Bearer ${applicationSettings.getString("authToken")}`,
-                },
+            const confirmResult = await confirm({
+                title: "Delete Post",
+                message: "Are you sure you want to delete this post?",
+                okButtonText: "Delete",
+                cancelButtonText: "Cancel",
+                neutralButtonText: null
             });
 
-            if (response && response.status === 201) {
-                alert("Post deleted successfully!");
-                this.$emit("postDeleted");
-                this.$navigateBack();
-            } else {
-                alert("Failed to delete the post. Try again.");
+            if (confirmResult) {
+                const response = await axios.delete(`http://10.0.2.2:3000/posts/${this.post.id}`, {
+                    headers: {
+                        Authorization: `Bearer ${applicationSettings.getString("authToken")}`,
+                    },
+                });
+
+                if (response && response.status === 201) {
+                    alert("Post deleted successfully!");
+                    this.$emit("postDeleted");
+                    this.$navigateBack();
+                } else {
+                    alert("Failed to delete the post. Try again.");
+                }
             }
         },
         goBack() {
@@ -133,92 +148,155 @@ export default {
         },
         viewCommentDetails(args) {
             const selectedResponse = this.responses[args.index];
-            this.$navigateTo(CommentDetails, { 
-                props: { comment: selectedResponse },
-                events: {
-                    commentDeleted: this.getAllResponses,
-                    commentUpdated: this.getAllResponses
-                }
-            });
+            const userIdLogged = applicationSettings.getString('userIdLogged');
+            
+            if (userIdLogged == selectedResponse.user_id.toString()) {
+                this.$navigateTo(CommentDetails, { 
+                    props: { comment: selectedResponse },
+                    events: {
+                        commentDeleted: this.getAllResponses,
+                        commentUpdated: this.getAllResponses
+                    }
+                });
+            } else {
+                alert("Access denied");
+            }
         },
     },
 };
 </script>
 
 <style scoped>
+.action-bar {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}
+
 .post-details-container {
-    padding: 20;
+    padding: 0;
+    background-color: #f8f9fa;
 }
 
-.post-user, .responses-title {
-    font-size: 18;
-    font-weight: bold;
-    margin-bottom: 10;
+.post-item {
+    padding: 16;
+    margin: 8;
+    background-color: white;
+    elevation: 2;
 }
 
-.post-content, .response-content {
+.post-header {
+    margin-bottom: 12;
+    align-items: center;
+}
+
+.user-icon {
+    width: 32;
+    height: 32;
+    padding: 6;
+    margin-right: 8;
+    text-align: center;
+    color: #ffffff;
+    background-color: #1a73e8;
+    border-radius: 16;
+    font-size: 14;
+}
+
+.user-icon.small {
+    width: 24;
+    height: 24;
+    padding: 4;
+    border-radius: 12;
+    font-size: 12;
+}
+
+.post-user, .comment-user {
     font-size: 16;
-    width: 100%;
-    color: #333;
-    margin-bottom: 20;
-    text-wrap: true;
+    font-weight: 500;
+    color: #1a1a1a;
+    padding-top: 6;
 }
 
-.response-input {
-    margin-bottom: 15;
-    padding: 10;
+.post-date {
+    font-size: 14;
+    color: #666666;
+    padding-top: 6;
+    margin-right: 8;
+}
+
+.post-content {
     font-size: 16;
-    border-width: 1;
-    border-color: #ccc;
-    border-radius: 5;
+    color: #333333;
+    line-height: 1.5;
+    margin: 8 0;
+}
+
+.comment-input-container {
+    padding: 16;
+    background-color: white;
+    margin-top: 8;
 }
 
 .textarea {
-    height: 150; 
-    margin-bottom: 15;
-    padding: 10;
+    height: 120;
+    padding: 12;
+    font-size: 16;
+    border-width: 1;
+    border-color: #e0e0e0;
+    border-radius: 8;
+    margin-bottom: 12;
+    background-color: #f8f9fa;
+}
+
+.section-title {
     font-size: 18;
-    border-width: 1;
-    border-color: #ccc;
-    border-radius: 5;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 16;
 }
 
-.responses-list {
-    margin: 10;
-    max-height: auto; 
+.comments-container {
+    width: 100%;
+    margin-bottom: 16;
 }
 
-.response-item {
-    padding: 10;
-    margin: 5;
-    border-width: 1;
-    border-color: #ddd;
-    border-radius: 5;
+.comment-item {
+    padding: 12;
+    margin: 4 8;
+    background-color: white;
+    elevation: 1;
 }
 
-.response-user {
+.comment-content {
+    font-size: 14;
+    color: #333333;
+    margin: 4 0;
+    line-height: 1.4;
+}
+
+.action-button {
+    background-color: #1a73e8;
+    color: white;
     font-size: 16;
     font-weight: bold;
-    margin-bottom: 5;
+    padding: 12;
+    border-radius: 8;
 }
 
-.button {
-    margin-top: 10;
-    padding: 10;
-    font-size: 18;
-    background-color: #4CAF50;
+.delete-button {
+    margin: 16;
+    background-color: #dc3545;
     color: white;
-    text-align: center;
-    border-radius: 5;
+    font-size: 16;
+    font-weight: bold;
+    padding: 12;
+    border-radius: 8;
 }
 
-.button-back {
-    margin-top: 10;
-    padding: 10;
-    font-size: 18;
-    background-color: #f44336;
-    color: white;
-    text-align: center;
-    border-radius: 5;
+.delete-icon {
+    font-family: "FontAwesome";
+    font-size: 20;
+    color: #dc3545;
+    padding: 8;
+    margin-left: auto;
 }
 </style>
