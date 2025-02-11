@@ -5,7 +5,28 @@ export const translations = {
         getStarted: "Get Started",
         selectLanguage: "Select Language",
         english: "English",
-        french: "Français"
+        french: "Français",
+        register: {
+            title: "Create Account",
+            username: "Username",
+            password: "Password",
+            role: "Role (user/admin)",
+            registerButton: "Register",
+            loginButton: "Login",
+            fillFields: "Please fill in all fields.",
+            success: "User registered successfully!",
+            error: "An error occurred. Please try again."
+        },
+        login: {
+            title: "Welcome Back",
+            username: "Username",
+            password: "Password",
+            loginButton: "Login",
+            registerButton: "Register",
+            fillFields: "Please fill in all fields.",
+            error: "An error occurred. Please try again.",
+            unexpectedError: "Unexpected error. Please try again."
+        }
     },
     fr: {
         welcome: "Bienvenue au blog!",
@@ -13,6 +34,27 @@ export const translations = {
         getStarted: "Commencer",
         selectLanguage: "Choisir la langue",
         english: "English",
-        french: "Français"
+        french: "Français",
+        register: {
+            title: "Créer un Compte",
+            username: "Nom d'utilisateur",
+            password: "Mot de passe",
+            role: "Rôle (user/admin)",
+            registerButton: "S'inscrire",
+            loginButton: "Connexion",
+            fillFields: "Veuillez remplir tous les champs.",
+            success: "Utilisateur enregistré avec succès!",
+            error: "Une erreur s'est produite. Veuillez réessayer."
+        },
+        login: {
+            title: "Bienvenue",
+            username: "Nom d'utilisateur",
+            password: "Mot de passe",
+            loginButton: "Connexion",
+            registerButton: "S'inscrire",
+            fillFields: "Veuillez remplir tous les champs.",
+            error: "Une erreur s'est produite. Veuillez réessayer.",
+            unexpectedError: "Erreur inattendue. Veuillez réessayer."
+        }
     }
 };

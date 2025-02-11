@@ -1,42 +1,42 @@
 <template>
     <Page>
-        <ActionBar title="Register" flat="true" class="action-bar">
+        <ActionBar :title="translations[currentLanguage].register.title" flat="true" class="action-bar">
             <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
         </ActionBar>
         <ScrollView>
             <StackLayout class="form-container">
                 <StackLayout class="auth-card">
-                    <Label text="Create Account" class="auth-title" />
+                    <Label :text="translations[currentLanguage].register.title" class="auth-title" />
                     
                     <TextField 
                         v-model="username" 
-                        hint="Username" 
+                        :hint="translations[currentLanguage].register.username" 
                         class="input-field" 
                         keyboardType="text"
                     />
             
                     <TextField 
                         v-model="password" 
-                        hint="Password" 
+                        :hint="translations[currentLanguage].register.password" 
                         :secure="true"
                         class="input-field"
                     />
             
                     <TextField 
                         v-model="role" 
-                        hint="Role (user/admin)" 
+                        :hint="translations[currentLanguage].register.role" 
                         class="input-field"
                     />
             
                     <FlexboxLayout class="buttons-container">
                         <Button 
-                            text="Register" 
+                            :text="translations[currentLanguage].register.registerButton" 
                             @tap="registerUser" 
                             class="action-button"
                         />
                         
                         <Button 
-                            text="Login" 
+                            :text="translations[currentLanguage].register.loginButton" 
                             @tap="goToLoginPage" 
                             class="secondary-button"
                         />
@@ -48,60 +48,61 @@
 </template>
 
 <script>
-  import axios from "axios";
-  import Login from "./Login.vue"; 
+import axios from "axios";
+import Login from "./Login.vue";
+import { translations } from '../i18n/translations';
+import * as applicationSettings from "@nativescript/core/application-settings";
 
-  export default {
+export default {
     data() {
-      return {
-        username: "",
-        password: "",
-        role: "",
-        error: null
-      };
+        return {
+            username: "",
+            password: "",
+            role: "",
+            error: null,
+            translations,
+            currentLanguage: 'fr'
+        };
+    },
+    created() {
+        this.currentLanguage = applicationSettings.getString('appLanguage', 'fr');
     },
     methods: {
-      goBack() {
-        this.$navigateBack();
-      },
-      async registerUser() {
-        if (this.username && this.password && this.role) {
-          try {
-            const response = await axios.post("http://10.0.2.2:3000/register", {
-              username: this.username,
-              password: this.password,
-              role: this.role,
-            });
+        goBack() {
+            this.$navigateBack();
+        },
+        async registerUser() {
+            if (this.username && this.password && this.role) {
+                try {
+                    const response = await axios.post("http://10.0.2.2:3000/register", {
+                        username: this.username,
+                        password: this.password,
+                        role: this.role,
+                    });
 
-            if (response && response.status === 201) {
-              alert(response.data.message || "User registered successfully!");
-              this.clearFields();
-              this.$navigateTo(Login);
+                    if (response && response.status === 201) {
+                        alert(this.translations[this.currentLanguage].register.success);
+                        this.clearFields();
+                        this.$navigateTo(Login);
+                    }
+                } catch (error) {
+                    alert(this.translations[this.currentLanguage].register.error);
+                    console.error(error);
+                }
             } else {
-              alert(`Unexpected response: ${response ? response.status : "null"}`);
+                alert(this.translations[this.currentLanguage].register.fillFields);
             }
-          } catch (error) {
-            if (error.response) {
-              alert(`Error: ${error.response.data.message}`);
-            } else {
-              alert("An error occurred. Please try again.");
-            }
-            console.error(error);
-          }
-        } else {
-          alert("Please fill in all fields.");
+        },
+        clearFields() {
+            this.username = "";
+            this.password = "";
+            this.role = "";
+        },
+        goToLoginPage() {
+            this.$navigateTo(Login); 
         }
-      },
-      clearFields() {
-        this.username = "";
-        this.password = "";
-        this.role = "";
-      },
-      goToLoginPage() {
-        this.$navigateTo(Login); 
-      }
     },
-  };
+};
 </script>
 
 <style scoped>
@@ -164,5 +165,12 @@
     font-weight: bold;
     padding: 12;
     border-radius: 8;
+}
+
+.language-toggle, 
+.language-toggle Label, 
+.language-toggle .separator, 
+.language-toggle .active {
+    display: none;
 }
 </style>

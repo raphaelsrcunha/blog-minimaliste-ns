@@ -1,36 +1,36 @@
 <template>
     <Page>
-        <ActionBar title="Login" flat="true" class="action-bar">
+        <ActionBar :title="translations[currentLanguage].login.title" flat="true" class="action-bar">
             <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
         </ActionBar>
         <ScrollView>
             <StackLayout class="form-container">
                 <StackLayout class="auth-card">
-                    <Label text="Welcome Back" class="auth-title" />
+                    <Label :text="translations[currentLanguage].login.title" class="auth-title" />
                     
                     <TextField 
                         v-model="username" 
-                        hint="Username" 
+                        :hint="translations[currentLanguage].login.username" 
                         class="input-field" 
                         keyboardType="text"
                     />
             
                     <TextField 
                         v-model="password" 
-                        hint="Password" 
+                        :hint="translations[currentLanguage].login.password" 
                         :secure="true"
                         class="input-field"
                     />
             
                     <FlexboxLayout class="buttons-container">
                         <Button 
-                            text="Login" 
+                            :text="translations[currentLanguage].login.loginButton" 
                             @tap="login" 
                             class="action-button"
                         />
                         
                         <Button 
-                            text="Register" 
+                            :text="translations[currentLanguage].login.registerButton" 
                             @tap="goToRegisterPage" 
                             class="secondary-button"
                         />
@@ -46,6 +46,7 @@ import axios from "axios";
 import Posts from "./Posts.vue";
 import Register from "./Register.vue";
 import { goBack } from "@nativescript/core/ui/frame/frame-common";
+import { translations } from '../i18n/translations';
 import * as applicationSettings from "@nativescript/core/application-settings";
 
 export default {
@@ -53,7 +54,13 @@ export default {
         return {
             username: "",
             password: "",
+            translations,
+            currentLanguage: 'fr'
         };
+    },
+    created() {
+        // Pega o idioma das configurações do app
+        this.currentLanguage = applicationSettings.getString('appLanguage', 'fr');
     },
     methods: {
         goBack() {
@@ -74,18 +81,14 @@ export default {
                         this.clearFields();
                         this.goToPostsPage();
                     } else {
-                        alert(`Unexpected response: ${response ? response.status : "something went wrong"}`);
+                        alert(this.translations[this.currentLanguage].login.unexpectedError);
                     }
                 } catch (error) {
-                    if (error.response) {
-                        alert(`Error: ${error.response.data.message}`);
-                    } else {
-                        alert("An error occurred. Please try again.");
-                    }
+                    alert(this.translations[this.currentLanguage].login.error);
                     console.error(error);
                 }
             } else {
-                alert("Please fill in all fields.");
+                alert(this.translations[this.currentLanguage].login.fillFields);
             }
         },
         clearFields() {
