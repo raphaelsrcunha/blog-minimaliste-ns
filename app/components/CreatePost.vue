@@ -1,6 +1,6 @@
 <template>
     <Page>
-        <ActionBar title="Create Post" flat="true" class="action-bar">
+        <ActionBar :title="translations[currentLanguage].createPost.title" flat="true" class="action-bar">
             <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
         </ActionBar>
         <ScrollView>
@@ -13,7 +13,7 @@
                     
                     <TextView 
                         v-model="content" 
-                        hint="What's on your mind?" 
+                        :hint="translations[currentLanguage].createPost.placeholder" 
                         class="textarea"
                         multiline="true"
                         editable="true"
@@ -21,13 +21,13 @@
 
                     <FlexboxLayout class="buttons-container">
                         <Button 
-                            text="Post" 
+                            :text="translations[currentLanguage].createPost.postButton" 
                             @tap="submitPost" 
                             class="action-button"
                         />
                         
                         <Button 
-                            text="Cancel" 
+                            :text="translations[currentLanguage].createPost.cancelButton" 
                             @tap="goBack" 
                             class="cancel-button"
                         />
@@ -40,6 +40,7 @@
 
 <script>
 import axios from "axios";
+import { translations } from '../i18n/translations';
 import * as applicationSettings from "@nativescript/core/application-settings";
 
 export default {
@@ -51,8 +52,13 @@ export default {
     },
     data() {
         return {
-            content: "", 
+            content: "",
+            translations,
+            currentLanguage: 'fr'
         };
+    },
+    created() {
+        this.currentLanguage = applicationSettings.getString('appLanguage', 'fr');
     },
     methods: {
         getCurrentUserId() {
@@ -70,21 +76,20 @@ export default {
                     });
 
                     if (response && response.status === 201) {
-                        alert("Post created successfully!");
+                        alert(this.translations[this.currentLanguage].createPost.success);
                         if (this.onPostCreated) {
                             this.onPostCreated();
                         }
                         this.content = "";
                         this.$navigateBack(); 
                     } else {
-                        alert("Failed to create the post. Try again.");
+                        alert(this.translations[this.currentLanguage].createPost.error);
                     }
                 } catch (error) {
-                    console.error(error);
-                    alert("An error occurred. Please try again.");
+                    alert(this.translations[this.currentLanguage].createPost.error);
                 }
             } else {
-                alert("Please write something before posting.");
+                alert(this.translations[this.currentLanguage].createPost.emptyError);
             }
         },
         goBack() {

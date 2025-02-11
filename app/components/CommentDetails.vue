@@ -1,6 +1,6 @@
 <template>
     <Page>
-        <ActionBar title="Comment Details" flat="true" class="action-bar">
+        <ActionBar :title="translations[currentLanguage].commentDetails.title" flat="true" class="action-bar">
             <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
         </ActionBar>
         <ScrollView>
@@ -20,13 +20,13 @@
 
                     <FlexboxLayout class="buttons-container">
                         <Button 
-                            text="Update" 
+                            :text="translations[currentLanguage].commentDetails.updateButton" 
                             @tap="updateResponse" 
                             class="action-button"
                         />
                         
                         <Button 
-                            text="Delete" 
+                            :text="translations[currentLanguage].commentDetails.deleteButton" 
                             @tap="deleteComment" 
                             class="delete-button" 
                         />
@@ -39,6 +39,7 @@
 
 <script>
 import axios from "axios";
+import { translations } from '../i18n/translations';
 import * as applicationSettings from "@nativescript/core/application-settings";
 
 export default {
@@ -51,12 +52,17 @@ export default {
     data() {
         return {
             newResponse: this.comment.content, 
+            translations,
+            currentLanguage: 'fr'
         };
+    },
+    created() {
+        this.currentLanguage = applicationSettings.getString('appLanguage', 'fr');
     },
     mounted() {
         const userIdLogged = applicationSettings.getString('userIdLogged');
         if (userIdLogged != this.comment.user_id.toString()) {
-            alert("Access denied");
+            alert(this.translations[this.currentLanguage].commentDetails.accessDenied);
             this.$navigateBack();
         }
     },
@@ -71,11 +77,11 @@ export default {
                 },
             });
             if (response && response.status === 204) {
-                alert("Comment deleted successfully");
+                alert(this.translations[this.currentLanguage].commentDetails.deleteSuccess);
                 this.$emit("commentDeleted");
                 this.$navigateBack();
             } else {
-                alert("Failed to delete comment");
+                alert(this.translations[this.currentLanguage].commentDetails.deleteError);
             }
         },
         async updateResponse() {
@@ -87,11 +93,11 @@ export default {
                 },
             });
             if (response && response.status === 204) {
-                alert("Comment updated successfully");
+                alert(this.translations[this.currentLanguage].commentDetails.updateSuccess);
                 this.$emit("commentUpdated");
                 this.$navigateBack();
             } else {
-                alert("Failed to update comment");
+                alert(this.translations[this.currentLanguage].commentDetails.updateError);
             }
         },
     },

@@ -1,10 +1,10 @@
 <template>
     <Page>
-        <ActionBar title="Feed" flat="true" class="action-bar">
+        <ActionBar :title="translations[currentLanguage].posts.title" flat="true" class="action-bar">
             <NavigationButton text="Back" android.systemIcon="ic_menu_close_clear_cancel" @tap="goBack" />
         </ActionBar>
         <GridLayout rows="auto,*" columns="*">
-            <Label :text="'Welcome back, ' + getUsername() + ' :)'" class="greeting" row="0" col="0" />
+            <Label :text="translations[currentLanguage].posts.greeting + ', ' + getUsername() + ' :)'" class="greeting" row="0" col="0" />
             <StackLayout class="posts-container" row="1" col="0">
                 <ListView for="post in posts" class="post-list" separatorColor="transparent" @itemTap="viewPostDetails">
                     <v-template>
@@ -27,13 +27,19 @@
 import axios from "axios";
 import CreatePost from "./CreatePost.vue";
 import PostDetails from "./PostDetails.vue";
+import { translations } from '../i18n/translations';
 import * as applicationSettings from "@nativescript/core/application-settings";
 
 export default {
     data() {
         return {
             posts: [],
+            translations,
+            currentLanguage: 'fr'
         };
+    },
+    created() {
+        this.currentLanguage = applicationSettings.getString('appLanguage', 'fr');
     },
     mounted() {
         this.getAllPosts();
@@ -49,7 +55,7 @@ export default {
                 this.posts = response.data;
             } catch (error) {
                 console.error(error);
-                alert("Falha ao carregar posts");
+                alert(this.translations[this.currentLanguage].posts.loadError);
             }
         },
         viewPostDetails(args) {

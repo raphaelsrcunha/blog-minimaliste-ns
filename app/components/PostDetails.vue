@@ -1,6 +1,6 @@
 <template>
     <Page>
-        <ActionBar title="Post Details" flat="true" class="action-bar">
+        <ActionBar :title="translations[currentLanguage].postDetails.title" flat="true" class="action-bar">
             <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
         </ActionBar>
         <ScrollView>
@@ -25,20 +25,20 @@
                 <StackLayout class="comment-input-container">
                     <TextView 
                         v-model="newResponse" 
-                        hint="Write a comment..." 
+                        :hint="translations[currentLanguage].postDetails.writeComment" 
                         class="textarea" 
                         multiline="true"
                         editable="true"
                     />
                     <Button 
-                        text="Comment" 
+                        :text="translations[currentLanguage].postDetails.commentButton" 
                         @tap="postResponse" 
                         class="action-button"
                     />
                 </StackLayout>
 
                 <!-- Comments List -->
-                <Label text="Comments" class="section-title" />
+                <Label :text="translations[currentLanguage].postDetails.commentsTitle" class="section-title" />
                 <StackLayout class="comments-container">
                     <StackLayout v-for="(response, index) in responses" :key="index" class="comment-item" @tap="viewCommentDetails({index})">
                         <FlexboxLayout class="comment-header">
@@ -56,6 +56,7 @@
 <script>
 import axios from "axios";
 import CommentDetails from "./CommentDetails.vue";
+import { translations } from '../i18n/translations';
 import * as applicationSettings from "@nativescript/core/application-settings";
 import { confirm } from "@nativescript/core/ui/dialogs";
 
@@ -70,7 +71,12 @@ export default {
         return {
             newResponse: "", 
             responses: [], 
+            translations,
+            currentLanguage: 'fr'
         };
+    },
+    created() {
+        this.currentLanguage = applicationSettings.getString('appLanguage', 'fr');
     },
     computed: {
         canDeletePost() {
@@ -94,7 +100,7 @@ export default {
                 });
                 this.responses = response.data;
             } catch (error) {
-                alert("Failed to load responses. Try again.");
+                alert(this.translations[this.currentLanguage].postDetails.loadError);
             }
         },
         postResponse() {
@@ -107,39 +113,43 @@ export default {
                     },
                 }).then((response) => {
                     if (response && response.status === 201) {
-                        alert("Response posted successfully!");
+                        alert(this.translations[this.currentLanguage].postDetails.commentSuccess);
                         this.newResponse = "";
                         this.getAllResponses();
                     } else {
-                        alert("Failed to post the response. Try again.");
+                        alert(this.translations[this.currentLanguage].postDetails.commentError);
                     }
                 }).catch((error) => {
-                    console.error(error);
+                    alert(this.translations[this.currentLanguage].postDetails.commentError);
                 });
             }
         },
         async deletePost() {
             const confirmResult = await confirm({
-                title: "Delete Post",
-                message: "Are you sure you want to delete this post?",
-                okButtonText: "Delete",
-                cancelButtonText: "Cancel",
+                title: this.translations[this.currentLanguage].postDetails.deleteConfirmTitle,
+                message: this.translations[this.currentLanguage].postDetails.deleteConfirmMessage,
+                okButtonText: this.translations[this.currentLanguage].postDetails.deleteButton,
+                cancelButtonText: this.translations[this.currentLanguage].postDetails.cancelButton,
                 neutralButtonText: null
             });
 
             if (confirmResult) {
-                const response = await axios.delete(`http://10.0.2.2:3000/posts/${this.post.id}`, {
-                    headers: {
-                        Authorization: `Bearer ${applicationSettings.getString("authToken")}`,
-                    },
-                });
+                try {
+                    const response = await axios.delete(`http://10.0.2.2:3000/posts/${this.post.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${applicationSettings.getString("authToken")}`,
+                        },
+                    });
 
-                if (response && response.status === 201) {
-                    alert("Post deleted successfully!");
-                    this.$emit("postDeleted");
-                    this.$navigateBack();
-                } else {
-                    alert("Failed to delete the post. Try again.");
+                    if (response && response.status === 201) {
+                        alert(this.translations[this.currentLanguage].postDetails.deleteSuccess);
+                        this.$emit("postDeleted");
+                        this.$navigateBack();
+                    } else {
+                        alert(this.translations[this.currentLanguage].postDetails.deleteError);
+                    }
+                } catch (error) {
+                    alert(this.translations[this.currentLanguage].postDetails.deleteError);
                 }
             }
         },
@@ -159,7 +169,7 @@ export default {
                     }
                 });
             } else {
-                alert("Access denied");
+                alert(this.translations[this.currentLanguage].postDetails.accessDenied);
             }
         },
     },

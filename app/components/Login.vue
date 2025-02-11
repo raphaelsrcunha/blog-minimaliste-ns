@@ -23,17 +23,19 @@
                     />
             
                     <FlexboxLayout class="buttons-container">
-                        <Button 
+
+                      <Button 
+                            :text="translations[currentLanguage].login.registerButton" 
+                            @tap="goToRegisterPage" 
+                            class="secondary-button"
+                        />
+
+                      <Button 
                             :text="translations[currentLanguage].login.loginButton" 
                             @tap="login" 
                             class="action-button"
                         />
                         
-                        <Button 
-                            :text="translations[currentLanguage].login.registerButton" 
-                            @tap="goToRegisterPage" 
-                            class="secondary-button"
-                        />
                     </FlexboxLayout>
                 </StackLayout>
             </StackLayout>
@@ -59,7 +61,6 @@ export default {
         };
     },
     created() {
-        // Pega o idioma das configurações do app
         this.currentLanguage = applicationSettings.getString('appLanguage', 'fr');
     },
     methods: {
