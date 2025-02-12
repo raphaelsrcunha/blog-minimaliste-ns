@@ -15,6 +15,13 @@ Blog Minimaliste NS est une application mobile qui permet aux utilisateurs de cr
 - 👥 Gestion de profil utilisateur
 - 🎨 Interface minimaliste et moderne
 
+## Futures Fonctionnalités
+
+- 👍 Système de likes pour les posts
+- ❤️ Système de likes pour les commentaires
+- 📨 Invitation de nouveaux membres
+- 📤 Partage de posts et commentaires
+
 ## Technologies Utilisées
 
 - NativeScript-Vue
