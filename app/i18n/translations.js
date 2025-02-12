@@ -69,6 +69,16 @@ export const translations = {
             deleteSuccess: "Comment deleted successfully",
             deleteError: "Failed to delete comment",
             accessDenied: "Access denied"
+        },
+        profile: {
+            title: "Profile",
+            username: "Username",
+            password: "New Password",
+            updateButton: "Update Profile",
+            updateSuccess: "Profile updated successfully!",
+            updateError: "Failed to update profile",
+            logout: "Logout",
+            language: "Select Language"
         }
     },
     fr: {
@@ -141,6 +151,16 @@ export const translations = {
             deleteSuccess: "Commentaire supprimé avec succès",
             deleteError: "Échec de la suppression du commentaire",
             accessDenied: "Accès refusé"
+        },
+        profile: {
+            title: "Profil",
+            username: "Nom d'utilisateur",
+            password: "Nouveau mot de passe (facultatif)",
+            updateButton: "Mettre à jour",
+            updateSuccess: "Profil mis à jour avec succès!",
+            updateError: "Échec de la mise à jour du profil",
+            logout: "Déconnexion",
+            language: "Choisir la langue"
         }
     }
 };

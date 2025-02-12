@@ -2,6 +2,11 @@
     <Page>
         <ActionBar :title="translations[currentLanguage].posts.title" flat="true" class="action-bar">
             <NavigationButton text="Back" android.systemIcon="ic_menu_close_clear_cancel" @tap="goBack" />
+            <ActionItem 
+                android.position="right"
+                android.systemIcon="ic_menu_manage" 
+                @tap="goToProfile"
+            />
         </ActionBar>
         <GridLayout rows="auto,*" columns="*">
             <Label :text="translations[currentLanguage].posts.greeting + ', ' + getUsername() + ' :)'" class="greeting" row="0" col="0" />
@@ -27,6 +32,7 @@
 import axios from "axios";
 import CreatePost from "./CreatePost.vue";
 import PostDetails from "./PostDetails.vue";
+import Profile from "./Profile.vue";
 import { translations } from '../i18n/translations';
 import * as applicationSettings from "@nativescript/core/application-settings";
 
@@ -84,6 +90,9 @@ export default {
         getUsername() {
             return applicationSettings.getString('usernameLogged');
         },
+        goToProfile() {
+            this.$navigateTo(Profile);
+        }
     },
 };
 </script>
