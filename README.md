@@ -1,6 +1,6 @@
 # Blog Minimaliste NS (Application Mobile)
 
-Une application mobile minimaliste de blog développée avec NativeScript-Vue.
+Une application mobile minimaliste de blog développée avec NativeScript-Vue pour le TP3 de la matière Programmation Mobile Multiplataforme.
 
 ## Description
 
